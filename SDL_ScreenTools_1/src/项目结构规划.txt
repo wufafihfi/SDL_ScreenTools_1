@@ -1,0 +1,10 @@
+src/
+├── main.cpp
+├── app.h / app.cpp
+├── core/
+│   ├── tray.h / tray.cpp
+│   └── window.h / window.cpp
+├── ui/
+│   └── gui.h / gui.cpp
+└── render/
+    └── pet_renderer.h / pet_renderer.cpp

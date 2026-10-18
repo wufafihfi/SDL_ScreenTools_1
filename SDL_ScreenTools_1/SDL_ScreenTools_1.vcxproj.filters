@@ -1,0 +1,181 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="源文件\imgui-1.92.9b">
+      <UniqueIdentifier>{edfc0662-9028-4068-b44a-427fd091de10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\imgui-1.92.9b">
+      <UniqueIdentifier>{ca8f2246-c21c-4d4a-8ba3-2fe872e9fc82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\imgui-1.92.9b\backends">
+      <UniqueIdentifier>{9a130c40-df70-435e-aa35-350deb63e00f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\imgui-1.92.9b\backends">
+      <UniqueIdentifier>{16c14149-2f36-4ab3-a0a4-08b6d0bdf0fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{1538a94c-7695-44b2-9058-a5a0e986182c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core">
+      <UniqueIdentifier>{c07720b5-ad3f-4a46-b51c-9e8adb6c6352}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\log">
+      <UniqueIdentifier>{f6a476e2-3d6f-4b74-8f5c-77f707c99a4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ui">
+      <UniqueIdentifier>{ef201b4d-04e6-474b-87ac-9418f7eacc0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\render">
+      <UniqueIdentifier>{4b4b2a4b-405b-4bf5-b2a4-c16e99991b84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源文件\icon">
+      <UniqueIdentifier>{79963c49-8dca-445f-9009-28e2ea0c43a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\sdl3Expand">
+      <UniqueIdentifier>{77e2c175-65bd-43b3-be81-ecab54ffa579}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\ImAnim-1.0.0">
+      <UniqueIdentifier>{a57cc13e-e7ee-4c0a-9d45-1031c4ebe6b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\imAnimExpand">
+      <UniqueIdentifier>{5452b0c8-bdc8-43f1-8ff7-c65164033570}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Save">
+      <UniqueIdentifier>{098be52f-4f33-4026-82fe-57feec59a8cf}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui-1.92.9b\imgui_demo.cpp">
+      <Filter>源文件\imgui-1.92.9b</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui-1.92.9b\imgui_draw.cpp">
+      <Filter>源文件\imgui-1.92.9b</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui-1.92.9b\imgui.cpp">
+      <Filter>源文件\imgui-1.92.9b</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui-1.92.9b\imgui_tables.cpp">
+      <Filter>源文件\imgui-1.92.9b</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui-1.92.9b\imgui_widgets.cpp">
+      <Filter>源文件\imgui-1.92.9b</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui-1.92.9b\backends\imgui_impl_sdl3.cpp">
+      <Filter>源文件\imgui-1.92.9b\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui-1.92.9b\backends\imgui_impl_sdlrenderer3.cpp">
+      <Filter>源文件\imgui-1.92.9b\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="src\app.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\log\LogSystem.cpp">
+      <Filter>src\log</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\tray.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\tool_Render.cpp">
+      <Filter>src\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\gui.cpp">
+      <Filter>src\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sdl3Expand\TTFText_tool.cpp">
+      <Filter>src\sdl3Expand</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\ImAnim-1.0.0\im_anim.cpp">
+      <Filter>头文件\ImAnim-1.0.0</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Save\dataSaver.cpp">
+      <Filter>src\Save</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="third_party\imgui-1.92.9b\imgui_internal.h">
+      <Filter>头文件\imgui-1.92.9b</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui-1.92.9b\imgui.h">
+      <Filter>头文件\imgui-1.92.9b</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui-1.92.9b\imconfig.h">
+      <Filter>头文件\imgui-1.92.9b</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui-1.92.9b\backends\imgui_impl_sdl3.h">
+      <Filter>头文件\imgui-1.92.9b\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui-1.92.9b\backends\imgui_impl_sdlrenderer3.h">
+      <Filter>头文件\imgui-1.92.9b\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="src\app.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\log\LogSystem.h">
+      <Filter>src\log</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\tray.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\gui.h">
+      <Filter>src\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\tool_Render.h">
+      <Filter>src\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\includeIMGUI.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\globalData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="assets\icon\icon_data.h">
+      <Filter>资源文件\icon</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sdl3Expand\TTFText_tool.h">
+      <Filter>src\sdl3Expand</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\ImAnim-1.0.0\im_anim.h">
+      <Filter>头文件\ImAnim-1.0.0</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imAnimExpand\imAnimTool.h">
+      <Filter>src\imAnimExpand</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ImguiStyleAndTheme.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Save\dataSaver.h">
+      <Filter>src\Save</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Save\FileManager.h">
+      <Filter>src\Save</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SDL_ScreenTools_1.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\icon\hacimiIcon_sdl3.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
