@@ -12,6 +12,21 @@ class Tray;
 class Gui;
 class ToolRenderer;
 
+struct mPath_
+{
+	std::filesystem::path imagePath_;
+	std::filesystem::path imguiIniPath_;
+	std::filesystem::path jsonConfigPath_;
+	std::filesystem::path logPath_;
+	std::filesystem::path fontPath_;
+	std::filesystem::path fontDictionaryPath_;
+
+	// utf-8 str
+	std::string imagePathStr_;
+	std::string imguiIniPathStr_;
+	std::string fontPathStr_;
+};
+
 class App {
 public:
 	App();
@@ -30,6 +45,8 @@ public:
 	SDL_Window* toolWindow()const { return toolSdlWindow_; }
 	SDL_Renderer* toolRenderer()const { return toolSdlRenderer_; }
 
+	void GetRenderTargetSize(int& W, int& H) { W = renderTarget_W; H = renderTarget_H; }
+
 	TTF_Font* sdlFont()const { return sdlFont_; }
 
 	//Title
@@ -38,8 +55,7 @@ public:
 	std::string* GetTrayTitle() { return &trayTitle_; }
 
 	//Path
-	std::filesystem::path* GetJsonConfigPath() { return &jsonConfigPath_; }
-	std::string* GetFontPath() { return &fontPathStr_; }
+	mPath_* GetPathStruct() { return &path_; }
 
 	bool  UiVisible() const { return uiVisible_; }
 	void  SetUiVisible(bool v);
@@ -67,6 +83,10 @@ private:
 	SDL_Window* toolSdlWindow_ = nullptr;
 	SDL_Renderer* toolSdlRenderer_ = nullptr;
 
+	int renderTarget_W = 1920;
+	int renderTarget_H = 1080;
+	SDL_Texture* renderTarget = nullptr;
+
 	TTF_Font* sdlFont_ = nullptr;
 
 	std::unique_ptr<Tray>			tray_;
@@ -76,6 +96,7 @@ private:
 	bool running_ = true;
 	bool uiVisible_ = true;
 
+	//mainPath
 	std::filesystem::path exePath_;
 
 	//Titles
@@ -84,13 +105,5 @@ private:
 	std::string trayTitle_ = u8"ÆÁÄ»¹¤¾ß-SDL3";
 
 	//Path
-	//std::string basePath_;
-	std::filesystem::path imguiIniPath_;
-	std::filesystem::path jsonConfigPath_;
-	std::filesystem::path logPath_;
-	std::filesystem::path fontPath_;
-
-	// utf-8 str
-	std::string imguiIniPathStr_;
-	std::string fontPathStr_;
+	mPath_ path_;
 };

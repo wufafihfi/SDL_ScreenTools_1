@@ -3,29 +3,65 @@
 #include "../app.h"
 #include "../includeIMGUI.hpp"
 #include "../log/LogSystem.h"
-#include "../imAnimExpand/imAnimTool.h"
-#include "../Save/dataSaver.h"
+#include "../imguiExpand/imguiTool.h"
+#include "../file/dataSaver.h"
+#include "../file/FileFinder.h"
 
 #include "../globalData.h"
 
+#include <algorithm>
+
 bool Gui::Init(App* app) {
     app_ = app;
+
+    SDL_Window* window = app_->mainWindow();
+    SDL_Renderer* renderer = app_->mainRenderer();
+
+    SDL_GetWindowPosition(window, &gData::mainWindowX, &gData::mainWindowY);
+    SDL_GetWindowSize(window, &gData::mainWindowW, &gData::mainWindowH);
+
+    gData::toolFontFinder.SetRootPath(app_->GetPathStruct()->fontDictionaryPath_.u8string());
+    gData::toolFontFinder.SetFontMode(gData::isFontMode);
+    gData::toolFontFinder.SetRecursive(false);
+    gData::toolFontFinder.SetCaseSensitive(true);
+    gData::toolFontFinder.Rescan();
+
+    gData::textureFinder.SetRootPath(app_->GetPathStruct()->imagePathStr_);
+    gData::textureFinder.SetExtensions({ ".png", ".jpg" });
+    gData::textureFinder.SetRecursive(false);
+    gData::textureFinder.SetCaseSensitive(true);
+    gData::textureFinder.Rescan();
+
+    texture = IMG_LoadTexture(app->mainRenderer(),
+        gData::textureFinder.Get(gData::bkImgSelected).fullPath.c_str()
+    );
+    if (!texture) {
+        LOG_ERROR_STREAM << u8"图片加载失败: " << SDL_GetError();
+        SDL_Log(u8"图片加载失败: %s", SDL_GetError());
+    }
+
     return true;
 }
 
-void ImguiMainWindow(App* app);
-void rightChildWindow_0(App* app);
-void rightChildWindow_1(App* app);
-void rightChildWindow_2(App* app);
-
-void Gui::imguiDraw() {
-    ImguiMainWindow(app_);
-    //ImGui::ShowDemoWindow();
-    //static bool showLog = true;
-    //SHOW_LOG_WINDOW(&showLog);
+void Gui::Shutdown() {
+    SDL_DestroyTexture(texture);
 }
 
-void ImguiMainWindow(App* app)
+void ImguiMainWindow(App* app, Gui* self);
+void rightChildWindow_0(App* app, Gui* self);
+void rightChildWindow_1(App* app, Gui* self);
+void rightChildWindow_2(App* app, Gui* self);
+
+void Gui::imguiDraw() {
+    ImguiMainWindow(app_,this);
+    //ImGui::ShowDemoWindow();
+    //static bool showLog = true;
+    SHOW_LOG_WINDOW(&gData::debugMode);
+}
+
+bool pageChangeAnim(int direction);
+
+void ImguiMainWindow(App* app, Gui* self)
 {
     ImGuiViewport* vp = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(vp->Pos);
@@ -92,10 +128,11 @@ void ImguiMainWindow(App* app)
     ImGui::SameLine();
 
     ImGui::BeginChild("Content", ImVec2(0, 0), true);
+    static int last_tab = current_tab;
     switch (current_tab) {
-    case 0: rightChildWindow_0(app); break;
-    case 1: rightChildWindow_1(app); break;
-    case 2: rightChildWindow_2(app); break;
+    case 0: rightChildWindow_0(app, self); break;
+    case 1: rightChildWindow_1(app, self); break;
+    case 2: rightChildWindow_2(app, self); break;
     }
     ImGui::EndChild();
 
@@ -104,17 +141,14 @@ void ImguiMainWindow(App* app)
 
 inline bool PlaneSelector(const char* id, ImVec2* coord, ImVec2 size);
 
-void rightChildWindow_0(App* app) {
-    static int WindowX = 0;
-    static int WindowY = 0;
-    static int WindowW = 0;
-    static int WindowH = 0;
+void rightChildWindow_0(App* app, Gui* self) {
+    static int WindowX = gData::toolWindowX;
+    static int WindowY = gData::toolWindowY;
+    static int WindowW = gData::toolWindowW;
+    static int WindowH = gData::toolWindowH;
     static SDL_Rect rect = app->GetDisplayRect();
-    SDL_Window* toolWindow = app->toolWindow();
 
-    SDL_GetWindowPosition(toolWindow, &WindowX, &WindowY);
-    SDL_GetWindowSize(toolWindow, &WindowW, &WindowH);
-
+    //位置
     static ImVec2 planeSize = ImVec2(400, 250);
     static ImVec2 pos = ImVec2(
         gData::windowPos.x / rect.w,
@@ -134,12 +168,15 @@ void rightChildWindow_0(App* app) {
     }
     ImGui::Text(u8"X:%0.1f Y:%0.1f", pos.x, pos.y);
 
+    //大小
     static int timeTextSize = gData::timeTextSize;
     if (ImGui::SliderInt(u8"字体大小", &timeTextSize, 5, 250)) {
+        gData::timeTextSizeChanged = true;
         gData::timeTextSize = timeTextSize;
         SaveConfig(app);
     }
 
+    //颜色
     static float color[4] = { 
         gData::timeColor.r / 255.0f, 
         gData::timeColor.g / 255.0f,
@@ -163,12 +200,124 @@ void rightChildWindow_0(App* app) {
     if (colorChanged) {
         SaveConfig(app);
     }
-}
-void rightChildWindow_1(App* app) {
 
-}
-void rightChildWindow_2(App* app) {
+    //选择文件
+    //字体
+    const char* toolFontPreview = (gData::toolFontSelected >= 0 && gData::toolFontSelected < gData::toolFontFinder.GetNamesCount())
+        ? gData::toolFontFinder.Get(gData::toolFontSelected).fileName.c_str()
+        : u8"<选择文件>";
 
+    if (ImGui::BeginCombo(u8"时间字体选择", toolFontPreview)) {
+        for (int i = 0; i < gData::toolFontFinder.GetNamesCount(); ++i) {
+            const bool isSelected = (gData::toolFontSelected == i);
+            if (ImGui::Selectable(gData::toolFontFinder.Get(i).fileName.c_str(), isSelected)) {
+                gData::toolFontSelected = i;
+                gData::toolFontChangeFlag = true;
+                SaveConfig(app);
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("%s", gData::toolFontFinder.Get(i).fullPath.c_str());
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    //背景
+    const char* bkImgPreview = (gData::bkImgSelected >= 0 && gData::bkImgSelected < gData::textureFinder.GetNamesCount())
+        ? gData::textureFinder.Get(gData::bkImgSelected).fileName.c_str()
+        : u8"<选择文件>";
+
+    if (ImGui::BeginCombo(u8"背景图选择", bkImgPreview)) {
+        for (int i = 0; i < gData::textureFinder.GetNamesCount(); ++i) {
+            const bool isSelected = (gData::bkImgSelected == i);
+            if (ImGui::Selectable(gData::textureFinder.Get(i).fileName.c_str(), isSelected)) {
+                gData::bkImgSelected = i;
+                self->texture = IMG_LoadTexture(app->mainRenderer(), 
+                    gData::textureFinder.Get(i).fullPath.c_str()
+                );
+                if (!self->texture) {
+                    LOG_ERROR_STREAM << u8"图片加载失败: " << SDL_GetError();
+                    SDL_Log(u8"图片加载失败: %s", SDL_GetError());
+                }
+                SaveConfig(app);
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("%s", gData::textureFinder.Get(i).fullPath.c_str());
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    //调试
+    MyToggle(u8"调试模式", &gData::debugMode);
+}
+void rightChildWindow_1(App* app, Gui* self) {
+    if (MyToggle(u8"启动时扫描系统字体(关闭后所选的系统字体将无法加载)", &gData::isFontMode)) {
+        SaveConfig(app);
+    }
+}
+void rightChildWindow_2(App* app, Gui* self) {
+    ImGui::Text(u8"版本:v0.2-alpha");
+}
+
+//切换动画
+bool pageChangeAnim(int direction) {
+    ImVec2 window_pos = ImGui::GetWindowPos();
+    ImVec2 window_size = ImGui::GetWindowSize();
+
+    // 2. 获取样式中的 Padding
+    float padding_x = ImGui::GetStyle().WindowPadding.x;
+    float padding_y = ImGui::GetStyle().WindowPadding.y;
+
+    ImVec2 child_min_pos = ImVec2(0, window_pos.y + padding_y);
+    ImVec2 contentSize = ImVec2(0, window_pos.y + window_size.y - padding_y);
+
+    if (contentSize.x <= 0 || contentSize.y <= 0) return false;
+
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+    const char* owner = "PageTransition";
+    const char* channel = "FillHeight";
+
+    float targetHeight = 0.0f;
+    if (direction > 0) {
+        targetHeight = contentSize.y;
+    }
+    else if (direction < 0) {
+        targetHeight = 0.0f;
+    }
+    else {
+        return true;
+    }
+
+    float currentHeight = TweenF(owner, channel, targetHeight, 0.2f, iam_ease_out_cubic);
+    
+    ImVec2 rect_min = ImVec2(child_min_pos.x, child_min_pos.y);
+    ImVec2 rect_max = ImVec2(child_min_pos.x + contentSize.x, child_min_pos.y + currentHeight);
+
+    draw_list->AddRectFilled(
+        rect_min,
+        rect_max,
+        ImGui::GetColorU32(ImGuiCol_Button), 
+        4.0f
+    );
+
+    bool isComplete = false;
+    static int last_dir = direction;
+    if (direction > 0) {
+        isComplete = (currentHeight >= contentSize.y - 0.1f);
+    }
+    else {
+        isComplete = (currentHeight <= 0.1f);
+    }
+    if (!isComplete  && direction != last_dir) {
+        isComplete = true;
+    }
+    if (isComplete) {
+        direction = last_dir;
+    }
+
+    return isComplete;
 }
 
 inline bool PlaneSelector(const char* id, ImVec2* coord, ImVec2 size = ImVec2(120, 120))
@@ -197,9 +346,11 @@ inline bool PlaneSelector(const char* id, ImVec2* coord, ImVec2 size = ImVec2(12
         changed = true;
     }
 
+    coord->x = std::clamp(coord->x, 0.0f, 1.0f);
+    coord->y = std::clamp(coord->y, 0.0f, 1.0f);
+
     ImDrawList* draw = ImGui::GetWindowDrawList();
 
-    // 从样式表取色（自动应用 style.Alpha）
     ImU32 col_bg = ImGui::GetColorU32(ImGuiCol_FrameBg);
     ImU32 col_border = ImGui::GetColorU32(ImGuiCol_Border);
     ImU32 col_hover = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
@@ -259,63 +410,12 @@ inline bool PlaneSelector(const char* id, ImVec2* coord, ImVec2 size = ImVec2(12
 }
 
 void Gui::sdlDraw() {
-    SDL_Renderer* renderer_ = app_->mainRenderer();
+    SDL_Window* window = app_->mainWindow();
+    SDL_Renderer* renderer = app_->mainRenderer();
 
-    SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
+    SDL_GetWindowPosition(window, &gData::mainWindowX, &gData::mainWindowY);
+    SDL_GetWindowSize(window, &gData::mainWindowW, &gData::mainWindowH);
 
-    // 拿到窗口尺寸，让图形居中
-    int w = 0, h = 0;
-    SDL_GetCurrentRenderOutputSize(renderer_, &w, &h);
-    float cx = w * 0.5f;
-    float cy = h * 0.5f;
-
-    // 用系统时间驱动动画
-    Uint64 now = SDL_GetTicks();
-    float t = now / 1000.0f;              // 秒
-    float angle = t * 1.5f;               // 旋转速度
-    float pulse = 0.5f + 0.5f * SDL_sinf(t * 2.0f);  // 0~1 呼吸
-    float radius = 60.0f + pulse * 40.0f;  // 60~100 像素
-
-    // 旋转的三角形，三个顶点颜色不同
-    SDL_Vertex tri[3];
-    SDL_Color colors[3] = {
-        { 255, 80, 80, 180 },   // 红
-        { 80, 255, 80, 180 },   // 绿
-        { 80, 80, 255, 180 },   // 蓝
-    };
-
-    for (int i = 0; i < 3; ++i) {
-        float a = angle + i * (2.0f * SDL_PI_F / 3.0f);
-        tri[i].position.x = cx + SDL_cosf(a) * radius;
-        tri[i].position.y = cy + SDL_sinf(a) * radius;
-        tri[i].color.r = colors[i].r / 255.0f;
-        tri[i].color.g = colors[i].g / 255.0f;
-        tri[i].color.b = colors[i].b / 255.0f;
-        tri[i].color.a = colors[i].a / 255.0f;
-        tri[i].tex_coord = { 0.0f, 0.0f };
-    }
-    SDL_RenderGeometry(renderer_, NULL, tri, 3, NULL, 0);
-
-    // 中心一个半透明圆（用多个小矩形近似，或者用三角形扇）
-    // 这里用 8 个三角形拼一个圆
-    const int seg = 16;
-    SDL_Vertex circle[seg * 3];
-    float circleR = 30.0f + pulse * 10.0f;
-    for (int i = 0; i < seg; ++i) {
-        float a0 = (i / (float)seg) * 2.0f * SDL_PI_F;
-        float a1 = ((i + 1) / (float)seg) * 2.0f * SDL_PI_F;
-
-        circle[i * 3 + 0].position = { cx, cy };
-        circle[i * 3 + 0].color = { 1.0f, 1.0f, 1.0f, 0.6f };
-        circle[i * 3 + 0].tex_coord = { 0.0f, 0.0f };
-
-        circle[i * 3 + 1].position = { cx + SDL_cosf(a0) * circleR, cy + SDL_sinf(a0) * circleR };
-        circle[i * 3 + 1].color = { 1.0f, 1.0f, 0.0f, 0.4f };
-        circle[i * 3 + 1].tex_coord = { 0.0f, 0.0f };
-
-        circle[i * 3 + 2].position = { cx + SDL_cosf(a1) * circleR, cy + SDL_sinf(a1) * circleR };
-        circle[i * 3 + 2].color = { 0.0f, 1.0f, 1.0f, 0.4f };
-        circle[i * 3 + 2].tex_coord = { 0.0f, 0.0f };
-    }
-    SDL_RenderGeometry(renderer_, NULL, circle, seg * 3, NULL, 0);
+    SDL_FRect dst = { 0, 0, gData::renderTarget_W, gData::renderTarget_H };
+    SDL_RenderTexture(renderer, texture, NULL, &dst);  // NULL 表示整张纹理
 }

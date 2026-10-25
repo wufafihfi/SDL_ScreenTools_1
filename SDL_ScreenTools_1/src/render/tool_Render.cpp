@@ -27,10 +27,10 @@ bool ToolRenderer::Init(App* app) {
     SDL_Window* window = app_->toolWindow();
     SDL_Renderer* renderer = app_->toolRenderer();
 
-    SDL_GetWindowPosition(window, &WindowX, &WindowY);
-    SDL_GetWindowSize(window, &WindowW, &WindowH);
+    SDL_GetWindowPosition(window, &gData::toolWindowX, &gData::toolWindowY);
+    SDL_GetWindowSize(window, &gData::toolWindowW, &gData::toolWindowH);
 
-    return textTool_.Init(app_->toolRenderer(), app_->GetFontPath()->c_str(),20);
+    return textTool_.Init(app_->toolRenderer(), app_->GetPathStruct()->fontPathStr_.c_str(),20);
 }
 
 void ToolRenderer::Shutdown() {
@@ -41,42 +41,56 @@ void ToolRenderer::Draw() {
     SDL_Window* window = app_->toolWindow();
     SDL_Renderer* renderer = app_->toolRenderer();
 
-    if(gData::windowPos.x != WindowX ||
-        gData::windowPos.y != WindowY){
+    if (gData::toolFontChangeFlag) {
+        gData::toolFontChangeFlag = false;
+        gData::toolFontID = textTool_.RegisterFont(
+            gData::toolFontFinder.Get(gData::toolFontSelected).fullPath.c_str()
+        );
+        gData::timeTextSizeChanged = true;
+    }
+
+    if(gData::windowPos.x != gData::toolWindowX ||
+        gData::windowPos.y != gData::toolWindowY){
         SDL_SetWindowPosition(window,
-            gData::windowPos.x - (WindowW / 2.0f),
-            gData::windowPos.y - (WindowH / 2.0f)
+            gData::windowPos.x - (gData::toolWindowW / 2.0f),
+            gData::windowPos.y - (gData::toolWindowH / 2.0f)
         );
     }
 
-    SDL_GetWindowPosition(window, &WindowX, &WindowY);
-    SDL_GetWindowSize(window, &WindowW, &WindowH);
+    SDL_GetWindowPosition(window, &gData::toolWindowX, &gData::toolWindowY);
+    SDL_GetWindowSize(window, &gData::toolWindowW, &gData::toolWindowH);
 
-    //SDL_FRect myRect = { 0, 0, WindowW, WindowH };
-    //SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE); // 红色
-    //SDL_RenderRect(renderer, &myRect);
+    if (gData::debugMode) {
+        SDL_FRect myRect = { 0, 0, gData::toolWindowW, gData::toolWindowH };
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE); // 红色
+        SDL_RenderRect(renderer, &myRect);
+    }
 
     static int TimeW = 0;
     static int TimeH = 0;
 
     textTool_.BeginBatch();
     textTool_.AddText(GetCurrentTimeString(),
-        (WindowW - TimeW) / 2.0f,
-        (WindowH - TimeH) / 2.0f,
-        gData::timeTextSize, gData::timeColor
+        (gData::toolWindowW - TimeW) / 2.0f,
+        (gData::toolWindowH - TimeH) / 2.0f,
+        gData::timeTextSize, gData::timeColor,
+        gData::toolFontID
     );
     textTool_.FlushBatch();
 
-    textTool_.GetTextSize(0, &TimeW, &TimeH);
 
     SDL_FRect timeRect = { 
-        (WindowW - TimeW) / 2.0f, (WindowH - TimeH) / 2.0f,
+        (gData::toolWindowW - TimeW) / 2.0f, (gData::toolWindowH - TimeH) / 2.0f,
         TimeW, TimeH
     };
-    //SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE); // 红色
-    //SDL_RenderRect(renderer, &timeRect);
+    if(gData::debugMode){
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE); // 红色
+        SDL_RenderRect(renderer, &timeRect);
+    }
 
-    if (WindowW != timeRect.w || WindowH != timeRect.h) {
-        SDL_SetWindowSize(window, timeRect.w, timeRect.h);
+    if ((gData::toolWindowW != timeRect.w + gData::timeTextSize * 3 || gData::toolWindowH != timeRect.h) || gData::timeTextSizeChanged) {
+        gData::timeTextSizeChanged = false;
+        textTool_.GetTextSize(0, &TimeW, &TimeH);
+        SDL_SetWindowSize(window, timeRect.w + gData::timeTextSize * 3, timeRect.h);
     }
 }

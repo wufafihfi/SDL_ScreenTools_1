@@ -42,3 +42,17 @@ inline ImVec2 TweenVec2(const char* owner, const char* channel, ImVec2 target,
     );
 }
 
+inline bool MyToggle(const char* label, bool* v)
+{
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.65f, 0.65f, 0.65f, 1.0f));
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.16f, 0.66f, 0.45f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 1.0f, 0.57f, 1.0f));
+
+    bool changed = ImGui::Toggle(label, v, ImGuiToggleFlags_Animated, 0.10f, 1.0f, 1.0f);
+
+    ImGui::PopStyleColor(4);
+    return changed;
+}
+

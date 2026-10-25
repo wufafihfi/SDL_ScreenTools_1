@@ -49,11 +49,14 @@
     <Filter Include="头文件\ImAnim-1.0.0">
       <UniqueIdentifier>{a57cc13e-e7ee-4c0a-9d45-1031c4ebe6b5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\imAnimExpand">
-      <UniqueIdentifier>{5452b0c8-bdc8-43f1-8ff7-c65164033570}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Save">
+    <Filter Include="src\file">
       <UniqueIdentifier>{098be52f-4f33-4026-82fe-57feec59a8cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\imgui-toggle">
+      <UniqueIdentifier>{e215367f-287f-47d0-81cf-93183708b239}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\imguiExpand">
+      <UniqueIdentifier>{5452b0c8-bdc8-43f1-8ff7-c65164033570}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -102,8 +105,23 @@
     <ClCompile Include="third_party\ImAnim-1.0.0\im_anim.cpp">
       <Filter>头文件\ImAnim-1.0.0</Filter>
     </ClCompile>
-    <ClCompile Include="src\Save\dataSaver.cpp">
-      <Filter>src\Save</Filter>
+    <ClCompile Include="src\file\dataSaver.cpp">
+      <Filter>src\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file\FileFinder.cpp">
+      <Filter>src\file</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui_toggle-main\imgui_toggle_presets.cpp">
+      <Filter>头文件\imgui-toggle</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui_toggle-main\imgui_toggle_renderer.cpp">
+      <Filter>头文件\imgui-toggle</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui_toggle-main\imgui_toggle.cpp">
+      <Filter>头文件\imgui-toggle</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\imgui_toggle-main\imgui_toggle_palette.cpp">
+      <Filter>头文件\imgui-toggle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -155,17 +173,38 @@
     <ClInclude Include="third_party\ImAnim-1.0.0\im_anim.h">
       <Filter>头文件\ImAnim-1.0.0</Filter>
     </ClInclude>
-    <ClInclude Include="src\imAnimExpand\imAnimTool.h">
-      <Filter>src\imAnimExpand</Filter>
-    </ClInclude>
     <ClInclude Include="src\ImguiStyleAndTheme.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\Save\dataSaver.h">
-      <Filter>src\Save</Filter>
+    <ClInclude Include="src\file\dataSaver.h">
+      <Filter>src\file</Filter>
     </ClInclude>
-    <ClInclude Include="src\Save\FileManager.h">
-      <Filter>src\Save</Filter>
+    <ClInclude Include="src\file\FileManager.h">
+      <Filter>src\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file\FileFinder.h">
+      <Filter>src\file</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui_toggle-main\imgui_toggle_palette.h">
+      <Filter>头文件\imgui-toggle</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui_toggle-main\imgui_toggle_presets.h">
+      <Filter>头文件\imgui-toggle</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui_toggle-main\imgui_toggle_renderer.h">
+      <Filter>头文件\imgui-toggle</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui_toggle-main\imgui_offset_rect.h">
+      <Filter>头文件\imgui-toggle</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui_toggle-main\imgui_toggle.h">
+      <Filter>头文件\imgui-toggle</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui_toggle-main\imgui_toggle_math.h">
+      <Filter>头文件\imgui-toggle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imguiExpand\imguiTool.h">
+      <Filter>src\imguiExpand</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

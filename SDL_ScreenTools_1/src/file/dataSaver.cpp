@@ -17,8 +17,12 @@ void SaveConfig(App* app) {
 
 	ConfigData["timeTextSize"] = gData::timeTextSize;
 
-	if (!saveJsonFile(*app->GetJsonConfigPath(), ConfigData)) {
-		LOG_WARNING_STREAM << "要保存的目标路径:" << *app->GetJsonConfigPath();
+	ConfigData["isFontMode"] = gData::isFontMode;
+	ConfigData["toolFontSelected"] = gData::toolFontSelected;
+	ConfigData["bkImgSelected"] = gData::bkImgSelected;
+
+	if (!saveJsonFile(app->GetPathStruct()->jsonConfigPath_, ConfigData)) {
+		LOG_WARNING_STREAM << "要保存的目标路径:" << app->GetPathStruct()->jsonConfigPath_;
 		LOG_WARNING(u8"配置文件保存失败 Config file save failed");
 	}
 }
@@ -26,8 +30,8 @@ void SaveConfig(App* app) {
 void LoadConfig(App* app) {
 	Json::Value ConfigData;
 
-	if (!readJsonFile(*app->GetJsonConfigPath(), ConfigData)) {
-		LOG_WARNING_STREAM << "要读取的目标路径:" << *app->GetJsonConfigPath();
+	if (!readJsonFile(app->GetPathStruct()->jsonConfigPath_, ConfigData)) {
+		LOG_WARNING_STREAM << "要读取的目标路径:" << app->GetPathStruct()->jsonConfigPath_;
 		LOG_WARNING(u8"配置文件读取失败,将使用默认值 Failed to read config file, will use defaults");
 		return;
 	}
@@ -48,5 +52,17 @@ void LoadConfig(App* app) {
 
 	if (ConfigData.isMember("timeTextSize")) {
 		gData::timeTextSize = ConfigData["timeTextSize"].asInt();
+	}
+
+	if (ConfigData.isMember("isFontMode")) {
+		gData::isFontMode = ConfigData["isFontMode"].asInt();
+	}
+
+	if (ConfigData.isMember("toolFontSelected")) {
+		gData::toolFontSelected = ConfigData["toolFontSelected"].asInt();
+	}
+
+	if (ConfigData.isMember("bkImgSelected")) {
+		gData::bkImgSelected = ConfigData["bkImgSelected"].asInt();
 	}
 }

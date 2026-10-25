@@ -13,13 +13,12 @@ public:
     void Shutdown();
     void Draw();
 
+    ~ToolRenderer() {
+        Shutdown();
+    }
+
 private:
     App* app_ = nullptr;
 
     TTFTextTool textTool_;
-
-    int WindowX = 0;
-    int WindowY = 0;
-    int WindowW = 0;
-    int WindowH = 0;
 };

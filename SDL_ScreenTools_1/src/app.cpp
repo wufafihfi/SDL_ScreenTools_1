@@ -3,7 +3,8 @@
 #include "ui/gui.h"
 #include "render/tool_Render.h"
 #include "log/LogSystem.h"
-#include "Save/dataSaver.h"
+#include "file/dataSaver.h"
+#include "globalData.h"
 
 #include "includeIMGUI.hpp"
 #include "ImguiStyleAndTheme.h"
@@ -35,9 +36,13 @@ bool App::Mutex() {
 }
 
 bool App::Init() {
+    //参数赋值
+    renderTarget_W = gData::renderTarget_W;
+    renderTarget_H = gData::renderTarget_H;
+
     if (!InitPath())    return false;
 
-    LogSystem::getInstance().init(logPath_, LogLevel::DEBUG, true, true, 1000);
+    LogSystem::getInstance().init(path_.logPath_, LogLevel::DEBUG, true, true, 1000);
     LogSystem::getInstance().setWindowTitle(u8"日志");
 
     LoadConfig(this);
@@ -124,13 +129,16 @@ bool App::InitPath() {
     exePath_ = std::filesystem::u8path(exePath);
     SDL_free((void*)exePath);
 
-    imguiIniPath_ = exePath_ / "config" / "imgui_state.ini";
-    jsonConfigPath_ = exePath_ / "config" / "config.json";
-    fontPath_ = exePath_ / "font" / "SimHei.ttf";
-    logPath_ = exePath_ / "log" / "MainLog.log";
+    path_.imagePath_ = exePath_ / "assats" / "image";
+    path_.imguiIniPath_ = exePath_ / "config" / "imgui_state.ini";
+    path_.jsonConfigPath_ = exePath_ / "config" / "config.json";
+    path_.fontPath_ = exePath_ / "font" / "SimHei.ttf";
+    path_.fontDictionaryPath_ = exePath_ / "font";
+    path_.logPath_ = exePath_ / "log" / "MainLog.log";
 
-    imguiIniPathStr_ = imguiIniPath_.u8string();
-    fontPathStr_ = fontPath_.u8string();
+    path_.imagePathStr_ = path_.imagePath_.u8string();
+    path_.imguiIniPathStr_ = path_.imguiIniPath_.u8string();
+    path_.fontPathStr_ = path_.fontPath_.u8string();
 
     return true;
 }
@@ -145,7 +153,7 @@ bool App::InitSdl() {
         printf("Failed to initialize SDL_ttf: %s\n", SDL_GetError());
         return false;
     }
-    const char* fontPath = fontPathStr_.c_str();
+    const char* fontPath = path_.fontPathStr_.c_str();
     sdlFont_ = TTF_OpenFont(fontPath, 18);
     if (!sdlFont_) {
         SDL_Log("TTF_OpenFont failed: %s", SDL_GetError());
@@ -176,6 +184,8 @@ bool App::InitWindows() {
 
     SDL_SetRenderVSync(toolSdlRenderer_, 1);
 
+    //////////////////////////////////////////////////////
+    
     //主窗口
     mainWindow_ = SDL_CreateWindow(mainWindowTitle_.c_str(), 800, 600, SDL_WINDOW_RESIZABLE);
     if (!mainWindow_) return false;
@@ -187,6 +197,12 @@ bool App::InitWindows() {
         mainRenderer_ = SDL_CreateRenderer(mainWindow_, nullptr);
         if (!mainRenderer_) return false;
     }
+
+    renderTarget = SDL_CreateTexture(
+        mainRenderer_,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_TARGET,
+        800, 600);
 
     SDL_SetRenderVSync(mainRenderer_, 1);
     return true;
@@ -201,11 +217,11 @@ bool App::InitImGui() {
     ImGui::StyleColorsDark();
 
     ImGuiIO& io = ImGui::GetIO();
-    if (!imguiIniPath_.empty()) {
-        io.IniFilename = imguiIniPathStr_.c_str();
+    if (!path_.imguiIniPath_.empty()) {
+        io.IniFilename = path_.imguiIniPathStr_.c_str();
     }
-    if (!fontPath_.empty()) {
-        io.Fonts->AddFontFromFileTTF(fontPath_.u8string().c_str(), 18.0f,
+    if (!path_.fontPath_.empty()) {
+        io.Fonts->AddFontFromFileTTF(path_.fontPath_.u8string().c_str(), 18.0f,
             nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
     }
     // 触摸屏兼容
@@ -254,6 +270,14 @@ void App::ProcessEvents() {
     while (SDL_PollEvent(&event)) {
         ImGui_ImplSDL3_ProcessEvent(&event);
 
+        if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
+            int w, h;
+            SDL_GetWindowSizeInPixels(mainWindow_, &w, &h);
+            SDL_DestroyTexture(renderTarget);
+            renderTarget = SDL_CreateTexture(mainRenderer_,
+                SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, w, h);
+        }
+
         if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
             SDL_WindowID wid = event.window.windowID;
             if (wid == SDL_GetWindowID(mainWindow_)) {
@@ -271,6 +295,26 @@ void App::ProcessEvents() {
 }
 
 void App::DrawUi() {
+    //SDL
+    SDL_SetRenderTarget(mainRenderer_, renderTarget);
+    SDL_SetRenderLogicalPresentation(mainRenderer_,
+       renderTarget_W, renderTarget_H,
+        SDL_LOGICAL_PRESENTATION_OVERSCAN
+    );
+
+    SDL_SetRenderDrawColor(mainRenderer_, 30, 30, 30, 255);
+    SDL_RenderClear(mainRenderer_);
+
+    gui_->sdlDraw();
+
+    //change
+    SDL_SetRenderTarget(mainRenderer_, NULL);
+    SDL_SetRenderLogicalPresentation(mainRenderer_, 0, 0,
+        SDL_LOGICAL_PRESENTATION_DISABLED);
+
+    SDL_RenderTexture(mainRenderer_, renderTarget, NULL, NULL);
+
+    //IMGUI
     ImGui_ImplSDLRenderer3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
@@ -281,12 +325,8 @@ void App::DrawUi() {
     gui_->imguiDraw();
 
     ImGui::Render();
-    SDL_SetRenderDrawColor(mainRenderer_, 30, 30, 30, 255);
-    SDL_RenderClear(mainRenderer_);
-
-    gui_->sdlDraw();
-
     ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), mainRenderer_);
+    //all
     SDL_RenderPresent(mainRenderer_);
 }
 
