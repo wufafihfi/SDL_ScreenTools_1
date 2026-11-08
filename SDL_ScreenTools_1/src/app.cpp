@@ -205,6 +205,11 @@ bool App::InitWindows() {
         800, 600);
 
     SDL_SetRenderVSync(mainRenderer_, 1);
+
+    //主窗口启动后状态
+    SetUiVisible(gData::mainWindowIsShow);
+    //////////////////
+
     return true;
 }
 
@@ -363,6 +368,8 @@ void App::Shutdown() {
 }
 
 void App::SetUiVisible(bool v) {
+    gData::mainWindowIsShow = v;
+    SaveConfig(this);
     if(v){
         SDL_ShowWindow(mainWindow_);
         SDL_RestoreWindow(mainWindow_);

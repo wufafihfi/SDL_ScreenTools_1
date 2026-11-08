@@ -150,30 +150,38 @@ void rightChildWindow_0(App* app, Gui* self) {
 
     //位置
     static ImVec2 planeSize = ImVec2(400, 250);
+    static ImVec2 lastPos = ImVec2(0, 0);
     static ImVec2 pos = ImVec2(
         gData::windowPos.x / rect.w,
         gData::windowPos.y / rect.h
     );
     bool posChanged = false;
     ImGui::Text(u8"时钟显示位置");
-    if (PlaneSelector("##plane1", &pos, planeSize)) {
-        posChanged = true;
+    if (!PlaneSelector("##plane1", &pos, planeSize)) {// 有 !
+        if ((pos.x != lastPos.x) || (pos.y != lastPos.y)) {
+            lastPos = pos;
+            posChanged = true;
+            SaveConfig(app);
+        }
     }
     gData::windowPos = ImVec2(
         pos.x * rect.w,
         pos.y * rect.h
     );
-    if (posChanged) {
-        SaveConfig(app);
-    }
     ImGui::Text(u8"X:%0.1f Y:%0.1f", pos.x, pos.y);
 
     //大小
+    static int lastTimeTextSize = 0;
     static int timeTextSize = gData::timeTextSize;
     if (ImGui::SliderInt(u8"字体大小", &timeTextSize, 5, 250)) {
         gData::timeTextSizeChanged = true;
         gData::timeTextSize = timeTextSize;
-        SaveConfig(app);
+    }
+    if (!ImGui::IsItemActive()) {
+        if (timeTextSize != lastTimeTextSize) {
+            lastTimeTextSize = timeTextSize;
+            SaveConfig(app);
+        }
     }
 
     //颜色
@@ -210,7 +218,10 @@ void rightChildWindow_0(App* app, Gui* self) {
     if (ImGui::BeginCombo(u8"时间字体选择", toolFontPreview)) {
         for (int i = 0; i < gData::toolFontFinder.GetNamesCount(); ++i) {
             const bool isSelected = (gData::toolFontSelected == i);
-            if (ImGui::Selectable(gData::toolFontFinder.Get(i).fileName.c_str(), isSelected)) {
+            if (ImGui::Selectable(
+                (gData::toolFontFinder.Get(i).fileName + "##" + std::to_string(i)).c_str(),
+                isSelected)
+                ) {
                 gData::toolFontSelected = i;
                 gData::toolFontChangeFlag = true;
                 SaveConfig(app);
@@ -230,7 +241,10 @@ void rightChildWindow_0(App* app, Gui* self) {
     if (ImGui::BeginCombo(u8"背景图选择", bkImgPreview)) {
         for (int i = 0; i < gData::textureFinder.GetNamesCount(); ++i) {
             const bool isSelected = (gData::bkImgSelected == i);
-            if (ImGui::Selectable(gData::textureFinder.Get(i).fileName.c_str(), isSelected)) {
+            if (ImGui::Selectable(
+                (gData::textureFinder.Get(i).fileName + "##" + std::to_string(i)).c_str(),
+                isSelected)
+                ) {
                 gData::bkImgSelected = i;
                 self->texture = IMG_LoadTexture(app->mainRenderer(), 
                     gData::textureFinder.Get(i).fullPath.c_str()
@@ -258,6 +272,8 @@ void rightChildWindow_1(App* app, Gui* self) {
 }
 void rightChildWindow_2(App* app, Gui* self) {
     ImGui::Text(u8"版本:v0.2-alpha");
+    ImGui::TextLinkOpenURL(u8"github仓库", u8"https://github.com/wufafihfi/SDL_ScreenTools_1");
+    ImGui::TextLinkOpenURL(u8"神秘小视频", u8"https://www.bilibili.com/video/BV1GJ411x7h7");
 }
 
 //切换动画

@@ -5,7 +5,11 @@
 #include "../globalData.h"
 
 void SaveConfig(App* app) {
+	LOG_INFO(u8"保存数据 save data...");
+
 	Json::Value ConfigData;
+
+	ConfigData["mainWindowIsShow"] = gData::mainWindowIsShow;
 
 	ConfigData["timeColor"]["R"] = gData::timeColor.r;
 	ConfigData["timeColor"]["G"] = gData::timeColor.g;
@@ -34,6 +38,10 @@ void LoadConfig(App* app) {
 		LOG_WARNING_STREAM << "要读取的目标路径:" << app->GetPathStruct()->jsonConfigPath_;
 		LOG_WARNING(u8"配置文件读取失败,将使用默认值 Failed to read config file, will use defaults");
 		return;
+	}
+
+	if (ConfigData.isMember("mainWindowIsShow")) {
+		gData::mainWindowIsShow = ConfigData["mainWindowIsShow"].asInt();
 	}
 
 	if (ConfigData.isMember("timeColor")){

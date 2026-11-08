@@ -42,23 +42,24 @@ int TTFTextTool::RegisterFont(const char* fontPath) {
         lastError_ = "RegisterFont: invalid path";
         return -1;
     }
+    // 已注册过就直接返回，避免重复追加
+    for (size_t i = 0; i < fontPaths_.size(); ++i) {
+        if (fontPaths_[i] == fontPath) {
+            return static_cast<int>(i);
+        }
+    }
     fontPaths_.emplace_back(fontPath);
     return static_cast<int>(fontPaths_.size()) - 1;
 }
 
 TTF_Font* TTFTextTool::GetFont(int fontId, float ptSize) {
     if (fontId < 0 || fontId >= static_cast<int>(fontPaths_.size())) {
-        fontId = 0;  // 非法 ID 回退默认
+        fontId = 0;
     }
 
     FontKey key{ fontId, ptSize };
     auto it = fontCache_.find(key);
     if (it != fontCache_.end()) return it->second;
-
-    if (fontId < 0 || fontId >= static_cast<int>(fontPaths_.size())) {
-        lastError_ = "GetFont: invalid fontId";
-        return nullptr;
-    }
 
     TTF_Font* font = TTF_OpenFont(fontPaths_[fontId].c_str(), ptSize);
     if (!font) {

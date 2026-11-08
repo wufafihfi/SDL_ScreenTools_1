@@ -14,6 +14,10 @@ namespace gData {
 	const int renderTarget_W = 1920;
 	const int renderTarget_H = 1080;
 
+	//need save{
+	inline bool mainWindowIsShow = true;
+	//}
+
 	//‘À–– ±
 	inline bool debugMode = false;
 
