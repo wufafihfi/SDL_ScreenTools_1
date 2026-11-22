@@ -14,10 +14,6 @@ namespace gData {
 	const int renderTarget_W = 1920;
 	const int renderTarget_H = 1080;
 
-	//need save{
-	inline bool mainWindowIsShow = true;
-	//}
-
 	//运行时
 	inline bool debugMode = false;
 
@@ -32,22 +28,23 @@ namespace gData {
 	inline int toolWindowH = 0;
 
 	inline FileFinder toolFontFinder;
-	//need save{
-	inline bool isFontMode = true;
-	inline int toolFontSelected = -1;
-	//}
-	inline bool toolFontChangeFlag = true;// 启动后加载1次
-	inline int toolFontID = -1;
 	inline FileFinder textureFinder;
-	//need save{
-	inline int bkImgSelected = -1;
-	//}
-	inline bool bkImgChangeFlag = false;
 
-	inline bool timeTextSizeChanged = false;
 	//need save{
-	inline SDL_Color timeColor = { 255,255,255,255 };
-	inline ImVec2 windowPos = ImVec2(0, 0);
+	inline bool mainWindowIsShow = true;
+	inline bool toolWindowIsShow = true;
+	inline bool isFontMode = true;
+	inline bool toolFontChangeFlag = true;// 启动后加载1次
+	inline bool bkImgChangeFlag = false;
+	inline bool timeTextSizeChanged = false;
+
+	inline int toolFontSelected = -1;
+	inline int toolFontID = -1;
+	inline int bkImgSelected = -1;
 	inline int timeTextSize = 40;
+
+	inline SDL_Color timeColor = { 255,255,255,255 };
+
+	inline ImVec2 windowPos = ImVec2(0, 0);
 	//}
 }

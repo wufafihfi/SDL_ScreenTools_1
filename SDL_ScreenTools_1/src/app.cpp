@@ -36,7 +36,6 @@ bool App::Mutex() {
 }
 
 bool App::Init() {
-    //参数赋值
     renderTarget_W = gData::renderTarget_W;
     renderTarget_H = gData::renderTarget_H;
 
@@ -91,7 +90,6 @@ bool App::Init() {
     return true;
 }
 
-//命名管道实现自动显示主窗口
 void App::StartSingleInstanceListener() {
     std::thread([this]() {
         while (running_) {
@@ -167,33 +165,27 @@ bool App::InitWindows() {
     displayID = SDL_GetPrimaryDisplay();
     SDL_GetDisplayBounds(displayID, &displayRect);
 
-    //工具窗口
     toolSdlWindow_ = SDL_CreateWindow(toolWindowTitle_.c_str(), 500, 100,
         SDL_WINDOW_BORDERLESS | SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_TRANSPARENT);
     if (!toolSdlWindow_) return false;
 
-    HWND hwnd = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(toolSdlWindow_),
-        SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
+    setWindowState();
 
-    LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
-    SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW);
-
-    //默认d3d
+    //d3d
     toolSdlRenderer_ = SDL_CreateRenderer(toolSdlWindow_, nullptr);
     if (!toolSdlRenderer_) return false;
 
     SDL_SetRenderVSync(toolSdlRenderer_, 1);
 
+    SetToolVisible(gData::toolWindowIsShow);
     //////////////////////////////////////////////////////
     
-    //主窗口
     mainWindow_ = SDL_CreateWindow(mainWindowTitle_.c_str(), 800, 600, SDL_WINDOW_RESIZABLE);
     if (!mainWindow_) return false;
 
     //OPENGL
     mainRenderer_ = SDL_CreateRenderer(mainWindow_, "opengl");
     if (!mainRenderer_) {
-        // 退路
         mainRenderer_ = SDL_CreateRenderer(mainWindow_, nullptr);
         if (!mainRenderer_) return false;
     }
@@ -206,7 +198,6 @@ bool App::InitWindows() {
 
     SDL_SetRenderVSync(mainRenderer_, 1);
 
-    //主窗口启动后状态
     SetUiVisible(gData::mainWindowIsShow);
     //////////////////
 
@@ -229,6 +220,7 @@ bool App::InitImGui() {
         io.Fonts->AddFontFromFileTTF(path_.fontPath_.u8string().c_str(), 18.0f,
             nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
     }
+
     // 触摸屏兼容
     io.ConfigFlags |= ImGuiConfigFlags_IsTouchScreen;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -259,7 +251,7 @@ void App::Run() {
         ProcessEvents();
 
         if (uiVisible_) DrawUi();
-        DrawTools();
+        if (toolVisible_) DrawTools();
 
         //60 FPS - 30 FPS
         Uint64 target = uiVisible_ ? 16 : 33;
@@ -373,7 +365,7 @@ void App::SetUiVisible(bool v) {
     if(v){
         SDL_ShowWindow(mainWindow_);
         SDL_RestoreWindow(mainWindow_);
-        //SDL_RaiseWindow(mainWindow_);//提升Z顺序
+        SDL_RaiseWindow(mainWindow_);//提升Z顺序
         uiVisible_ = true;
     }
     else
@@ -381,4 +373,37 @@ void App::SetUiVisible(bool v) {
         SDL_HideWindow(mainWindow_);
         uiVisible_ = false;
     }
+}
+
+void App::SetToolVisible(bool v) {
+    gData::toolWindowIsShow = v;
+    SaveConfig(this);
+    SDL_SetHint(SDL_HINT_WINDOW_ACTIVATE_WHEN_SHOWN, "0");
+    if (v) {
+        SDL_ShowWindow(toolSdlWindow_);
+        SDL_RestoreWindow(toolSdlWindow_);
+        toolVisible_ = true;
+    }
+    else
+    {
+        SDL_HideWindow(toolSdlWindow_);
+        toolVisible_ = false;
+    }
+    SDL_SetHint(SDL_HINT_WINDOW_ACTIVATE_WHEN_SHOWN, "1");
+}
+
+void App::setWindowState() {
+    HWND hwnd = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(toolSdlWindow_),
+        SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
+
+    LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+    SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW);
+
+    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+}
+
+void App::ResetWindowState() {
+    setWindowState();
+    SetToolVisible(gData::toolWindowIsShow);
 }

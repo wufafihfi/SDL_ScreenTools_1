@@ -10,6 +10,7 @@ void SaveConfig(App* app) {
 	Json::Value ConfigData;
 
 	ConfigData["mainWindowIsShow"] = gData::mainWindowIsShow;
+	ConfigData["toolWindowIsShow"] = gData::toolWindowIsShow;
 
 	ConfigData["timeColor"]["R"] = gData::timeColor.r;
 	ConfigData["timeColor"]["G"] = gData::timeColor.g;
@@ -41,7 +42,10 @@ void LoadConfig(App* app) {
 	}
 
 	if (ConfigData.isMember("mainWindowIsShow")) {
-		gData::mainWindowIsShow = ConfigData["mainWindowIsShow"].asInt();
+		gData::mainWindowIsShow = ConfigData["mainWindowIsShow"].asBool();
+	}
+	if (ConfigData.isMember("toolWindowIsShow")) {
+		gData::toolWindowIsShow = ConfigData["toolWindowIsShow"].asBool();
 	}
 
 	if (ConfigData.isMember("timeColor")){
@@ -63,7 +67,7 @@ void LoadConfig(App* app) {
 	}
 
 	if (ConfigData.isMember("isFontMode")) {
-		gData::isFontMode = ConfigData["isFontMode"].asInt();
+		gData::isFontMode = ConfigData["isFontMode"].asBool();
 	}
 
 	if (ConfigData.isMember("toolFontSelected")) {

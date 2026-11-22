@@ -57,9 +57,14 @@ public:
 	//Path
 	mPath_* GetPathStruct() { return &path_; }
 
-	bool  UiVisible() const { return uiVisible_; }
-	void  SetUiVisible(bool v);
-	void  RequestQuit() { running_ = false; }
+	bool uiVisible() const { return uiVisible_; }
+	void SetUiVisible(bool v);
+	void RequestQuit() { running_ = false; }
+
+	bool toolVisible() const { return toolVisible_; }
+	void SetToolVisible(bool v);
+	void setWindowState(); // 置顶和样式更改
+	void ResetWindowState();
 
 private:
 	void StartSingleInstanceListener();
@@ -95,6 +100,7 @@ private:
 
 	bool running_ = true;
 	bool uiVisible_ = true;
+	bool toolVisible_ = true;
 
 	//mainPath
 	std::filesystem::path exePath_;

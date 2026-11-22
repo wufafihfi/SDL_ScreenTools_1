@@ -62,7 +62,7 @@ void ToolRenderer::Draw() {
 
     if (gData::debugMode) {
         SDL_FRect myRect = { 0, 0, gData::toolWindowW, gData::toolWindowH };
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE); // ºìÉ«
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderRect(renderer, &myRect);
     }
 
@@ -84,7 +84,7 @@ void ToolRenderer::Draw() {
         TimeW, TimeH
     };
     if(gData::debugMode){
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE); // ºìÉ«
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderRect(renderer, &timeRect);
     }
 

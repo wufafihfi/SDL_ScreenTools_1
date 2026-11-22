@@ -19,5 +19,10 @@ public:
     SDL_Texture* texture = nullptr;
 
 private:
+    void ImguiMainWindow();
+    void rightChildWindow_0();
+    void rightChildWindow_1();
+    void rightChildWindow_2();
+
     App* app_ = nullptr;
 };

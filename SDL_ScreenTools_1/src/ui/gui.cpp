@@ -47,13 +47,8 @@ void Gui::Shutdown() {
     SDL_DestroyTexture(texture);
 }
 
-void ImguiMainWindow(App* app, Gui* self);
-void rightChildWindow_0(App* app, Gui* self);
-void rightChildWindow_1(App* app, Gui* self);
-void rightChildWindow_2(App* app, Gui* self);
-
 void Gui::imguiDraw() {
-    ImguiMainWindow(app_,this);
+    ImguiMainWindow();
     //ImGui::ShowDemoWindow();
     //static bool showLog = true;
     SHOW_LOG_WINDOW(&gData::debugMode);
@@ -61,7 +56,7 @@ void Gui::imguiDraw() {
 
 bool pageChangeAnim(int direction);
 
-void ImguiMainWindow(App* app, Gui* self)
+void Gui::ImguiMainWindow()
 {
     ImGuiViewport* vp = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(vp->Pos);
@@ -130,9 +125,9 @@ void ImguiMainWindow(App* app, Gui* self)
     ImGui::BeginChild("Content", ImVec2(0, 0), true);
     static int last_tab = current_tab;
     switch (current_tab) {
-    case 0: rightChildWindow_0(app, self); break;
-    case 1: rightChildWindow_1(app, self); break;
-    case 2: rightChildWindow_2(app, self); break;
+    case 0: rightChildWindow_0(); break;
+    case 1: rightChildWindow_1(); break;
+    case 2: rightChildWindow_2(); break;
     }
     ImGui::EndChild();
 
@@ -141,12 +136,12 @@ void ImguiMainWindow(App* app, Gui* self)
 
 inline bool PlaneSelector(const char* id, ImVec2* coord, ImVec2 size);
 
-void rightChildWindow_0(App* app, Gui* self) {
+void Gui::rightChildWindow_0() {
     static int WindowX = gData::toolWindowX;
     static int WindowY = gData::toolWindowY;
     static int WindowW = gData::toolWindowW;
     static int WindowH = gData::toolWindowH;
-    static SDL_Rect rect = app->GetDisplayRect();
+    static SDL_Rect rect = app_->GetDisplayRect();
 
     //位置
     static ImVec2 planeSize = ImVec2(400, 250);
@@ -156,12 +151,26 @@ void rightChildWindow_0(App* app, Gui* self) {
         gData::windowPos.y / rect.h
     );
     bool posChanged = false;
-    ImGui::Text(u8"时钟显示位置");
+    ImGui::SeparatorText(u8"时钟设置");
+
+    if (MyToggle(u8"显示时钟", &gData::toolWindowIsShow)) {
+        app_->SetToolVisible(gData::toolWindowIsShow);
+    }
+
+    /////////////////////
+    static bool disabled = gData::toolWindowIsShow;
+    ImGui::BeginDisabled(disabled);
+
+    if (ImGui::Button(u8"刷新窗口")) {
+        app_->ResetWindowState();
+    }
+
+    ImGui::Text(u8"时钟显示位置:");
     if (!PlaneSelector("##plane1", &pos, planeSize)) {// 有 !
         if ((pos.x != lastPos.x) || (pos.y != lastPos.y)) {
             lastPos = pos;
             posChanged = true;
-            SaveConfig(app);
+            SaveConfig(app_);
         }
     }
     gData::windowPos = ImVec2(
@@ -180,7 +189,7 @@ void rightChildWindow_0(App* app, Gui* self) {
     if (!ImGui::IsItemActive()) {
         if (timeTextSize != lastTimeTextSize) {
             lastTimeTextSize = timeTextSize;
-            SaveConfig(app);
+            SaveConfig(app_);
         }
     }
 
@@ -206,7 +215,7 @@ void rightChildWindow_0(App* app, Gui* self) {
     gData::timeColor.b = (Uint8)(color[2] * 255.0f + 0.5f);
     gData::timeColor.a = (Uint8)(color[3] * 255.0f + 0.5f);
     if (colorChanged) {
-        SaveConfig(app);
+        SaveConfig(app_);
     }
 
     //选择文件
@@ -224,7 +233,7 @@ void rightChildWindow_0(App* app, Gui* self) {
                 ) {
                 gData::toolFontSelected = i;
                 gData::toolFontChangeFlag = true;
-                SaveConfig(app);
+                SaveConfig(app_);
             }
             if (ImGui::IsItemHovered()) {
                 ImGui::SetTooltip("%s", gData::toolFontFinder.Get(i).fullPath.c_str());
@@ -232,6 +241,12 @@ void rightChildWindow_0(App* app, Gui* self) {
         }
         ImGui::EndCombo();
     }
+
+    ImGui::EndDisabled();
+    disabled = !gData::toolWindowIsShow;
+    /////////////////////
+
+    ImGui::SeparatorText(u8"窗口设置");
 
     //背景
     const char* bkImgPreview = (gData::bkImgSelected >= 0 && gData::bkImgSelected < gData::textureFinder.GetNamesCount())
@@ -246,14 +261,14 @@ void rightChildWindow_0(App* app, Gui* self) {
                 isSelected)
                 ) {
                 gData::bkImgSelected = i;
-                self->texture = IMG_LoadTexture(app->mainRenderer(), 
+                texture = IMG_LoadTexture(app_->mainRenderer(),
                     gData::textureFinder.Get(i).fullPath.c_str()
                 );
-                if (!self->texture) {
+                if (!texture) {
                     LOG_ERROR_STREAM << u8"图片加载失败: " << SDL_GetError();
                     SDL_Log(u8"图片加载失败: %s", SDL_GetError());
                 }
-                SaveConfig(app);
+                SaveConfig(app_);
             }
             if (ImGui::IsItemHovered()) {
                 ImGui::SetTooltip("%s", gData::textureFinder.Get(i).fullPath.c_str());
@@ -261,16 +276,15 @@ void rightChildWindow_0(App* app, Gui* self) {
         }
         ImGui::EndCombo();
     }
-
-    //调试
-    MyToggle(u8"调试模式", &gData::debugMode);
 }
-void rightChildWindow_1(App* app, Gui* self) {
+void Gui::rightChildWindow_1() {
+    MyToggle(u8"调试模式", &gData::debugMode);
+
     if (MyToggle(u8"启动时扫描系统字体(关闭后所选的系统字体将无法加载)", &gData::isFontMode)) {
-        SaveConfig(app);
+        SaveConfig(app_);
     }
 }
-void rightChildWindow_2(App* app, Gui* self) {
+void Gui::rightChildWindow_2() {
     ImGui::Text(u8"版本:v0.2-alpha");
     ImGui::TextLinkOpenURL(u8"github仓库", u8"https://github.com/wufafihfi/SDL_ScreenTools_1");
     ImGui::TextLinkOpenURL(u8"神秘小视频", u8"https://www.bilibili.com/video/BV1GJ411x7h7");
@@ -281,7 +295,6 @@ bool pageChangeAnim(int direction) {
     ImVec2 window_pos = ImGui::GetWindowPos();
     ImVec2 window_size = ImGui::GetWindowSize();
 
-    // 2. 获取样式中的 Padding
     float padding_x = ImGui::GetStyle().WindowPadding.x;
     float padding_y = ImGui::GetStyle().WindowPadding.y;
 
